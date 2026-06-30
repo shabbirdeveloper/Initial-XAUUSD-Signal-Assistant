@@ -343,6 +343,10 @@ export function DashboardClient({ initialAnalysis }: { initialAnalysis: Analysis
         <TimeframeSelector value={timeframe} onChange={handleTimeframeChange} disabled={loading} />
       </section>
 
+      <div className="xl:hidden">
+        <SignalCard signal={analysis.signal} onSave={handleSaveSignal} saving={saving} />
+      </div>
+
       {message || analysis.notice ? (
         <div className="rounded-xl border border-gold-400/25 bg-gold-400/10 px-4 py-3 text-sm text-gold-100 shadow-[0_18px_48px_rgba(0,0,0,0.22)]">
           {message ?? analysis.notice}
@@ -564,7 +568,9 @@ export function DashboardClient({ initialAnalysis }: { initialAnalysis: Analysis
         </div>
 
         <aside className="space-y-4 xl:self-start">
-          <SignalCard signal={analysis.signal} onSave={handleSaveSignal} saving={saving} />
+          <div className="hidden xl:block">
+            <SignalCard signal={analysis.signal} onSave={handleSaveSignal} saving={saving} />
+          </div>
           <section className="premium-panel rounded-xl p-4">
             <div className="flex items-center gap-2">
               <AlertTriangle size={18} className="text-gold-400" aria-hidden="true" />
