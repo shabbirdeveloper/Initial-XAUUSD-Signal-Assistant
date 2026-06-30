@@ -194,26 +194,6 @@ function buildMarketAlerts(analysis: AnalysisResult): AlertItemData[] {
     type: "Market Alert"
   });
 
-  if (signal.smc && signal.smc.score >= 60) {
-    items.push({
-      action: "SMC confirmation logged",
-      category: "Market",
-      confidence: signal.smc.score,
-      detail: `SMC grade ${signal.smc.grade}. BOS: ${signal.smc.bos.status}; CHoCH: ${signal.smc.choch.status}; FVG: ${signal.smc.fvg.status}.`,
-      iconKey: "target",
-      id: `market-smc-${signal.createdAt}`,
-      message: "Institutional Structure Alert",
-      metric: `${signal.smc.score}/100`,
-      priority: signal.smc.score >= 80 ? "High" : "Medium",
-      session: currentSession(),
-      status: "Unread",
-      symbol: signal.symbol,
-      time: formatTime(signal.createdAt),
-      tone: "violet",
-      type: "Market Alert"
-    });
-  }
-
   return items;
 }
 
@@ -338,7 +318,7 @@ function buildInsights(items: AlertItemData[], analysis: AnalysisResult): AlertI
   return [
     { label: `${signal.signalType} signal confidence is ${signal.confidence}% on ${signal.timeframe.toUpperCase()}; alert only if it clears your configured threshold.`, tone: signal.signalType === "HOLD" ? "gold" : toneFromSignal(signal.signalType) },
     { label: highNews ? `${highNews.message}: ${highNews.detail}` : "No immediate high-impact USD event detected in the current alert window.", tone: highNews ? "red" : "green" },
-    { label: `SMC score is ${signal.smc?.score ?? 0}/100 and trend strength is ${signal.trendStrength ?? 0}/100. Use this to filter weak alerts.`, tone: (signal.smc?.score ?? 0) >= 70 ? "green" : "gold" },
+    { label: `Trend strength is ${signal.trendStrength ?? 0}/100 and risk score is ${signal.riskScore ?? 0}/100. Use this to filter weak alerts.`, tone: (signal.trendStrength ?? 0) >= 70 ? "green" : "gold" },
     { label: `Current session is ${currentSession()} with session score ${signal.sessionScore ?? 0}/100.`, tone: (signal.sessionScore ?? 0) >= 80 ? "green" : "blue" }
   ];
 }

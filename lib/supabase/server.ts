@@ -1,21 +1,9 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { isValidSupabaseUrl, normalizeSupabaseUrl } from "@/lib/supabase/url";
 
 let cachedClient: SupabaseClient | null | undefined;
 let cachedClientSignature: string | null = null;
 let loggedSupabaseConfig = false;
-
-function isValidSupabaseUrl(url: string | undefined): url is string {
-  if (!url) {
-    return false;
-  }
-
-  try {
-    const parsed = new URL(url);
-    return parsed.protocol === "https:" && parsed.hostname.endsWith(".supabase.co");
-  } catch {
-    return false;
-  }
-}
 
 function maskSecret(value: string | undefined) {
   if (!value) {
@@ -81,7 +69,7 @@ function logSupabaseConfig(url: string | undefined, anonKey: string | undefined,
 }
 
 export function getSupabaseServerClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const url = normalizeSupabaseUrl(process.env.NEXT_PUBLIC_SUPABASE_URL);
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   const signature = `${url ?? "missing"}:${maskSecret(key)}`;
 

@@ -124,7 +124,7 @@ function gradeFromScore(score: number) {
 }
 
 function tradeGrade(trade: BacktestTrade) {
-  if (trade.smcGrade === "A+" || (trade.confidence ?? 0) >= 88) {
+  if ((trade.confidence ?? 0) >= 88) {
     return "A+";
   }
   if (trade.result === "win" && trade.rr >= 1.5) {
@@ -488,25 +488,6 @@ function MetricTile({ label, value, tone = "white" }: { label: string; value: st
   );
 }
 
-function SmcAccuracyTile({ accuracy, label, total }: { accuracy: number; label: string; total: number }) {
-  const tone = accuracy >= 70 ? "text-emerald-300" : accuracy >= 55 ? "text-gold-300" : "text-rose-300";
-
-  return (
-    <div className="glass-tile rounded-xl p-4">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-xs font-medium uppercase text-slate-400">{label}</p>
-        <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] font-bold text-slate-300">
-          {total} trades
-        </span>
-      </div>
-      <p className={cn("mt-3 text-2xl font-bold", tone)}>{accuracy.toFixed(1)}%</p>
-      <div className="mt-3 h-2 rounded-full bg-slate-900/70">
-        <div className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-violet-400 to-gold-300" style={{ width: `${clamp(accuracy, 0, 100)}%` }} />
-      </div>
-    </div>
-  );
-}
-
 function ConfidenceBucketRow({ bucket, total, winRate }: { bucket: string; total: number; winRate: number }) {
   const tone = winRate >= 70 ? "bg-emerald-400" : winRate >= 55 ? "bg-gold-400" : "bg-rose-400";
 
@@ -627,13 +608,6 @@ export function BacktestClient({ initialSummary }: { initialSummary: BacktestSum
       : summary.win_rate >= 70 && summary.profit_factor >= 1.5
         ? "Strategy profile is constructive. Keep risk fixed and prioritize the strongest session windows."
         : "Performance needs more confirmation. Reduce size and avoid low-liquidity setups.";
-  const smcStats = summary.smc_stats;
-  const smcTotals = {
-    bos: summary.trades.filter((trade) => trade.bosConfirmed).length,
-    choch: summary.trades.filter((trade) => trade.chochConfirmed).length,
-    liquidity: summary.trades.filter((trade) => trade.liquiditySweep).length,
-    fvg: summary.trades.filter((trade) => trade.fvgRetest).length
-  };
   const confidenceAccuracy = (summary.confidence_accuracy ?? [
     { bucket: "90-100%", total: summary.trades.filter((trade) => (trade.confidence ?? 0) >= 90 && trade.result !== "open").length, winRate: 0 },
     { bucket: "80-89%", total: summary.trades.filter((trade) => (trade.confidence ?? 0) >= 80 && (trade.confidence ?? 0) < 90 && trade.result !== "open").length, winRate: 0 },
@@ -1006,23 +980,7 @@ export function BacktestClient({ initialSummary }: { initialSummary: BacktestSum
         </section>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1.35fr_1fr_0.85fr]">
-        <section className="premium-panel rounded-xl p-5">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h2 className="text-base font-semibold text-white">SMC Backtest Analysis</h2>
-              <p className="mt-1 text-xs text-slate-400">Institutional confirmation layer accuracy for BOS, CHoCH, liquidity sweeps, and FVG retests.</p>
-            </div>
-            <span className="rounded-full border border-violet-400/25 bg-violet-400/10 px-3 py-1 text-xs font-bold text-violet-200">Phase 3</span>
-          </div>
-          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <SmcAccuracyTile accuracy={smcStats?.bos_accuracy ?? 0} label="BOS Accuracy" total={smcTotals.bos} />
-            <SmcAccuracyTile accuracy={smcStats?.choch_accuracy ?? 0} label="CHoCH Accuracy" total={smcTotals.choch} />
-            <SmcAccuracyTile accuracy={smcStats?.liquidity_sweep_accuracy ?? 0} label="Liquidity Sweep" total={smcTotals.liquidity} />
-            <SmcAccuracyTile accuracy={smcStats?.fvg_accuracy ?? 0} label="FVG Retest" total={smcTotals.fvg} />
-          </div>
-        </section>
-
+      <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_0.85fr]">
         <section className="premium-panel rounded-xl p-5">
           <h2 className="text-base font-semibold text-white">Confidence Accuracy</h2>
           <p className="mt-1 text-xs text-slate-400">Actual closed-trade win rate by AI confidence range.</p>

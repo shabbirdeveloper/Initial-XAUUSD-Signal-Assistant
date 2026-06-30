@@ -61,62 +61,15 @@ export interface SignalRuleResult {
   detail: string;
 }
 
-export type SmcDirection = "bullish" | "bearish" | "neutral";
-export type SmcGrade = "A+" | "A" | "B" | "C";
-
-export interface SmcAnalysis {
-  bos: {
-    status: "Bullish BOS" | "Bearish BOS" | "No BOS";
-    direction: SmcDirection;
-    strength: number;
-    timeframe: Timeframe;
-    confirmed: boolean;
-  };
-  choch: {
-    status: "Bullish CHoCH" | "Bearish CHoCH" | "No CHoCH";
-    direction: SmcDirection;
-    reversalProbability: number;
-    confidence: number;
-    confirmed: boolean;
-  };
-  liquidity: {
-    status: "Equal High Sweep" | "Equal Low Sweep" | "Buy Side Liquidity" | "Sell Side Liquidity" | "No Sweep";
-    direction: SmcDirection;
-    strength: number;
-    confirmed: boolean;
-  };
-  fvg: {
-    status: "Bullish FVG" | "Bearish FVG" | "No FVG";
-    direction: SmcDirection;
-    gapCreated: boolean;
-    gapRetested: boolean;
-    gapFilled: boolean;
-    nearest: number | null;
-    distance: number | null;
-    strength: number;
-    confirmed: boolean;
-  };
-  score: number;
-  grade: SmcGrade;
-}
+export type QualityGrade = "A+" | "A" | "B" | "C";
 
 export interface WeightedConfidence {
   technical: number;
   news: number;
   session: number;
-  smc: number;
   risk: number;
   final: number;
-  grade: SmcGrade;
-}
-
-export interface EliteSetup {
-  detected: boolean;
-  direction: SignalType;
-  confidence: number;
-  quality: SmcGrade;
-  expectedRiskReward: number;
-  reasons: string[];
+  grade: QualityGrade;
 }
 
 export interface TradeManagementPlan {
@@ -158,9 +111,7 @@ export interface SignalResult {
   rules: SignalRuleResult[];
   bias: "long" | "short" | "neutral";
   createdAt: string;
-  smc?: SmcAnalysis;
   weightedConfidence?: WeightedConfidence;
-  eliteSetup?: EliteSetup;
   tradeManagement?: TradeManagementPlan;
   positiveFactors?: string[];
   negativeFactors?: string[];
@@ -225,12 +176,6 @@ export interface BacktestTrade {
   result: "win" | "loss" | "open";
   rr: number;
   confidence?: number;
-  smcScore?: number;
-  smcGrade?: SmcGrade;
-  bosConfirmed?: boolean;
-  chochConfirmed?: boolean;
-  liquiditySweep?: boolean;
-  fvgRetest?: boolean;
 }
 
 export interface BacktestSummary extends BacktestRecord {
@@ -245,12 +190,6 @@ export interface BacktestSummary extends BacktestRecord {
   best_session?: string;
   worst_session?: string;
   best_timeframe?: Timeframe;
-  smc_stats?: {
-    bos_accuracy: number;
-    choch_accuracy: number;
-    liquidity_sweep_accuracy: number;
-    fvg_accuracy: number;
-  };
   confidence_accuracy?: Array<{
     range: string;
     win_rate: number;

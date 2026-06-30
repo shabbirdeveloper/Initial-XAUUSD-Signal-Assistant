@@ -229,13 +229,13 @@ const INITIAL_ENTRIES: JournalEntry[] = [
     rrAchieved: 2.05,
     session: "London + NY",
     timeframe: "4h",
-    setup: "Liquidity Sweep",
+    setup: "Trend Pullback",
     emotion: "Confident",
-    whyEntered: "<p>Liquidity sweep under daily support followed by bullish displacement.</p>",
+    whyEntered: "<p>Trend pullback into daily support followed by bullish confirmation.</p>",
     whyExited: "<p>Closed at the next major supply zone.</p>",
     mistakes: "<p>No mistake. Waited for confirmation and respected risk.</p>",
-    lessons: "<p>London and New York overlap gives the cleanest continuation after sweeps.</p>",
-    improvements: "<p>Document more screenshots around the sweep candle.</p>",
+    lessons: "<p>London and New York overlap gives the cleanest continuation after confirmed pullbacks.</p>",
+    improvements: "<p>Document more screenshots around the confirmation candle.</p>",
     screenshots: { before: "", during: "", after: "" }
   },
   {
@@ -1538,7 +1538,7 @@ export function JournalClient() {
             </div>
             <div className="grid gap-4 md:grid-cols-[1fr_220px]">
               <FormField label="Setup">
-                <input className={inputClass} value={draft.setup} onChange={(event) => updateDraft("setup", event.target.value)} placeholder="EMA Pullback, Breakout, Liquidity Sweep" />
+                <input className={inputClass} value={draft.setup} onChange={(event) => updateDraft("setup", event.target.value)} placeholder="EMA Pullback, Breakout, Trend Pullback" />
               </FormField>
               <FormField label="Emotion">
                 <select className={inputClass} value={draft.emotion} onChange={(event) => updateDraft("emotion", event.target.value as Emotion)}>

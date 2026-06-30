@@ -1,10 +1,7 @@
 import { calculateAtr, calculateEma, calculateIndicators, calculateMacd, calculateRsi } from "@/lib/indicators";
-import { analyzeSmartMoneyConcepts } from "@/lib/smc-engine";
 import {
   type Candle,
-  type EliteSetup,
-  type SmcAnalysis,
-  type SmcGrade,
+  type QualityGrade,
   type SignalResult,
   type SignalRuleResult,
   type SignalStrength,
@@ -147,7 +144,7 @@ function buildStrength(signalType: SignalType, confidence: number): SignalStreng
   return "Weak";
 }
 
-function gradeFromScore(score: number): SmcGrade {
+function gradeFromScore(score: number): QualityGrade {
   if (score >= 88) return "A+";
   if (score >= 74) return "A";
   if (score >= 58) return "B";
@@ -275,14 +272,12 @@ function buildWeightedConfidence(params: {
   technical: number;
   newsScore: number;
   sessionScore: number;
-  smcScore: number;
   riskScore: number;
 }): WeightedConfidence {
   const final = Math.round(
-    params.technical * 0.4 +
+    params.technical * 0.5 +
       params.newsScore * 0.2 +
-      params.sessionScore * 0.15 +
-      params.smcScore * 0.15 +
+      params.sessionScore * 0.2 +
       params.riskScore * 0.1
   );
 
@@ -290,7 +285,6 @@ function buildWeightedConfidence(params: {
     technical: Math.round(params.technical),
     news: Math.round(params.newsScore),
     session: Math.round(params.sessionScore),
-    smc: Math.round(params.smcScore),
     risk: Math.round(params.riskScore),
     final,
     grade: gradeFromScore(final)
@@ -357,59 +351,6 @@ function buildTradeManagementPlan(params: {
         params.newsScore >= 70 ? "News risk acceptable" : "News risk requires protection"
       ]
     }
-  };
-}
-
-function buildEliteSetup(params: {
-  signalType: SignalType;
-  confidence: number;
-  weighted: WeightedConfidence;
-  smc: SmcAnalysis;
-  emaAligned: boolean;
-  rsiConfirmed: boolean;
-  macdConfirmed: boolean;
-  fvgRetest: boolean;
-  sessionActive: boolean;
-  newsSafe: boolean;
-  riskAcceptable: boolean;
-}): EliteSetup {
-  const smcDirection = params.signalType === "BUY" ? "bullish" : params.signalType === "SELL" ? "bearish" : "neutral";
-  const detected =
-    params.signalType !== "HOLD" &&
-    params.weighted.final >= 95 &&
-    params.emaAligned &&
-    params.rsiConfirmed &&
-    params.macdConfirmed &&
-    params.smc.bos.confirmed &&
-    params.smc.bos.direction === smcDirection &&
-    params.smc.choch.confirmed &&
-    params.smc.choch.direction === smcDirection &&
-    params.smc.liquidity.confirmed &&
-    params.smc.liquidity.direction === smcDirection &&
-    params.fvgRetest &&
-    params.smc.fvg.direction === smcDirection &&
-    params.sessionActive &&
-    params.newsSafe &&
-    params.riskAcceptable;
-
-  return {
-    detected,
-    direction: params.signalType,
-    confidence: params.weighted.final,
-    quality: detected ? "A+" : params.weighted.grade,
-    expectedRiskReward: 2,
-    reasons: [
-      params.emaAligned ? "EMA Trend Aligned" : "EMA trend incomplete",
-      params.rsiConfirmed ? "RSI Confirmed" : "RSI not confirmed",
-      params.macdConfirmed ? "MACD Confirmed" : "MACD not confirmed",
-      params.smc.bos.confirmed ? params.smc.bos.status : "BOS not confirmed",
-      params.smc.choch.confirmed ? params.smc.choch.status : "CHoCH not confirmed",
-      params.smc.liquidity.confirmed ? params.smc.liquidity.status : "Liquidity sweep missing",
-      params.fvgRetest ? "FVG Retest" : "FVG retest missing",
-      params.sessionActive ? "Session Active" : "Session inactive",
-      params.newsSafe ? "News Safe" : "News risk elevated",
-      params.riskAcceptable ? "Risk Acceptable" : "Risk filter weak"
-    ]
   };
 }
 
@@ -504,7 +445,6 @@ export function analyzeSignal(params: {
   const activeSession = isGoldActiveSession(current.time, timeframe);
   const volatilityOk = atr !== null && atrPct >= profile.minAtrPct && atrPct <= profile.maxAtrPct;
   const trendStrengthOk = emaSpreadAtr >= profile.minEmaSpreadAtr;
-  const smc = analyzeSmartMoneyConcepts({ candles, timeframe, atr });
   const rsiRising = rsiLatest && rsiPrevious ? rsiLatest.value >= rsiPrevious.value - 0.8 : false;
   const rsiFalling = rsiLatest && rsiPrevious ? rsiLatest.value <= rsiPrevious.value + 0.8 : false;
   const macdImproving = histogram && previousHistogram ? histogram.value > previousHistogram.value : false;
@@ -826,7 +766,6 @@ export function analyzeSignal(params: {
     technical: technicalConfidence,
     newsScore,
     sessionScore,
-    smcScore: smc.score,
     riskScore
   });
   let confidence = technicalConfidence;
@@ -846,19 +785,7 @@ export function analyzeSignal(params: {
 
   const bias = signalType === "BUY" ? "long" : signalType === "SELL" ? "short" : bestDirection;
   const activeRules = bestDirection === "long" ? buyRules : sellRules;
-  const smcDirection = bestDirection === "long" ? "bullish" : "bearish";
-  const smcRules = [
-    rule("BOS Confirmed", smc.bos.confirmed && smc.bos.direction === smcDirection, 15, `${smc.bos.status} strength ${smc.bos.strength}/100.`),
-    rule("CHoCH Confirmed", smc.choch.confirmed && smc.choch.direction === smcDirection, 15, `${smc.choch.status} confidence ${smc.choch.confidence}/100.`),
-    rule(
-      "Liquidity Sweep Present",
-      smc.liquidity.confirmed && smc.liquidity.direction === smcDirection,
-      10,
-      `${smc.liquidity.status} strength ${smc.liquidity.strength}/100.`
-    ),
-    rule("FVG Retest", smc.fvg.confirmed && smc.fvg.direction === smcDirection, 10, `${smc.fvg.status}; distance ${smc.fvg.distance ?? "--"} points.`)
-  ];
-  const displayRules = [...activeRules, ...smcRules];
+  const displayRules = activeRules;
   const matchedRules = activeRules.filter((item) => item.matched);
   const failedRules = activeRules.filter((item) => !item.matched);
   const riskLevels = buildRiskLevelsForTimeframe(
@@ -880,23 +807,6 @@ export function analyzeSignal(params: {
     sessionScore,
     newsScore
   });
-  const eliteSetup = buildEliteSetup({
-    signalType,
-    confidence,
-    weighted: weightedConfidence,
-    smc,
-    emaAligned: bestDirection === "long" ? bullishTrendFilter : bearishTrendFilter,
-    rsiConfirmed:
-      bestDirection === "long"
-        ? Boolean(longMomentum || h1LongMomentum || m15LongMomentum || m30LongMomentum || h4LongMomentum)
-        : Boolean(shortMomentum || h1ShortMomentum || m15ShortMomentum || m30ShortMomentum || h4ShortMomentum),
-    macdConfirmed: bestDirection === "long" ? macdBias === "bullish" || macdImproving : macdBias === "bearish" || macdWeakening,
-    fvgRetest: smc.fvg.confirmed,
-    sessionActive: activeSession,
-    newsSafe: newsRisk !== "High",
-    riskAcceptable: riskScore >= 70
-  });
-
   return {
     indicators: snapshot,
     indicatorSeries: series,
@@ -912,9 +822,7 @@ export function analyzeSignal(params: {
       rules: displayRules,
       bias: signalType === "HOLD" ? "neutral" : bias,
       createdAt: new Date().toISOString(),
-      smc,
       weightedConfidence,
-      eliteSetup,
       tradeManagement,
       positiveFactors,
       negativeFactors,

@@ -89,15 +89,6 @@ function sessionForTime(value: string) {
   return "Sydney";
 }
 
-function accuracyFor(
-  trades: BacktestTrade[],
-  predicate: (trade: BacktestTrade) => boolean
-) {
-  const rows = trades.filter((trade) => predicate(trade) && trade.result !== "open");
-  const wins = rows.filter((trade) => trade.result === "win").length;
-  return rows.length ? roundTo((wins / rows.length) * 100, 1) : 0;
-}
-
 function confidenceAccuracy(trades: BacktestTrade[]) {
   const buckets = [
     { range: "90-100%", min: 90, max: 100 },
@@ -170,13 +161,7 @@ export async function runBasicBacktest(params: {
       takeProfit: signal.takeProfit1,
       result,
       rr,
-      confidence: signal.confidence,
-      smcScore: signal.smc?.score,
-      smcGrade: signal.smc?.grade,
-      bosConfirmed: signal.smc?.bos.confirmed,
-      chochConfirmed: signal.smc?.choch.confirmed,
-      liquiditySweep: signal.smc?.liquidity.confirmed,
-      fvgRetest: signal.smc?.fvg.confirmed
+      confidence: signal.confidence
     });
   }
 
@@ -223,12 +208,6 @@ export async function runBasicBacktest(params: {
     best_session: rankedSessions[0]?.score === -999 ? "No sample" : rankedSessions[0]?.session,
     worst_session: rankedSessions[rankedSessions.length - 1]?.score === -999 ? "No sample" : rankedSessions[rankedSessions.length - 1]?.session,
     best_timeframe: params.timeframe,
-    smc_stats: {
-      bos_accuracy: accuracyFor(trades, (trade) => Boolean(trade.bosConfirmed)),
-      choch_accuracy: accuracyFor(trades, (trade) => Boolean(trade.chochConfirmed)),
-      liquidity_sweep_accuracy: accuracyFor(trades, (trade) => Boolean(trade.liquiditySweep)),
-      fvg_accuracy: accuracyFor(trades, (trade) => Boolean(trade.fvgRetest))
-    },
     confidence_accuracy: confidenceAccuracy(trades)
   };
 }

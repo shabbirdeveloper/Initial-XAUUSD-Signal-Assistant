@@ -68,28 +68,21 @@ export function SignalCard({ signal, onSave, saving }: { signal: SignalResult; o
           ["Stop Loss", signal.stopLoss],
           ["TP1", signal.takeProfit1],
           ["TP2", signal.takeProfit2],
-          ["TP3", signal.tradeManagement?.tp3 ?? signal.takeProfit2],
-          ["SMC Score", signal.smc?.score ?? 0]
+          ["TP3", signal.tradeManagement?.tp3 ?? signal.takeProfit2]
         ].map(([label, value]) => (
           <div key={label} className="glass-tile rounded-lg p-3.5 transition hover:border-cyan-300/25 hover:bg-cyan-300/5">
             <dt className="text-xs text-slate-400">{label}</dt>
             <dd className="mt-1.5 text-base font-semibold text-white">
-              {label === "SMC Score" ? `${value}/100` : formatPrice(value as number)}
+              {formatPrice(value as number)}
             </dd>
           </div>
         ))}
       </dl>
 
-      <div className="relative mt-4 grid grid-cols-2 gap-3">
+      <div className="relative mt-4 grid grid-cols-1 gap-3">
         <div className="glass-tile rounded-lg p-3.5">
           <p className="text-xs text-slate-400">AI Grade</p>
           <p className="mt-1.5 text-xl font-bold text-violet-200">{signal.weightedConfidence?.grade ?? "C"}</p>
-        </div>
-        <div className="glass-tile rounded-lg p-3.5">
-          <p className="text-xs text-slate-400">Elite Setup</p>
-          <p className={cn("mt-1.5 text-sm font-bold", signal.eliteSetup?.detected ? "text-gold-300" : "text-slate-300")}>
-            {signal.eliteSetup?.detected ? "Detected" : "Not Ready"}
-          </p>
         </div>
       </div>
 
@@ -109,18 +102,6 @@ export function SignalCard({ signal, onSave, saving }: { signal: SignalResult; o
           <span className="font-semibold text-gold-300">{signal.signalType}:</span> {signal.explanation}
         </p>
       </div>
-
-      {signal.smc ? (
-        <div className="relative mt-4 rounded-xl border border-cyan-300/15 bg-cyan-300/10 p-3.5">
-          <p className="text-xs font-semibold uppercase tracking-wide text-cyan-200">Smart Money Concepts</p>
-          <div className="mt-3 grid gap-2 text-xs text-slate-300">
-            <div className="flex justify-between gap-3"><span>BOS</span><span className="font-semibold text-white">{signal.smc.bos.status}</span></div>
-            <div className="flex justify-between gap-3"><span>CHoCH</span><span className="font-semibold text-white">{signal.smc.choch.status}</span></div>
-            <div className="flex justify-between gap-3"><span>Liquidity</span><span className="font-semibold text-white">{signal.smc.liquidity.status}</span></div>
-            <div className="flex justify-between gap-3"><span>FVG</span><span className="font-semibold text-white">{signal.smc.fvg.status}</span></div>
-          </div>
-        </div>
-      ) : null}
 
       <div className="scrollbar-thin relative mt-4 max-h-64 space-y-2.5 overflow-y-auto pr-1">
         {signal.rules.map((rule) => {

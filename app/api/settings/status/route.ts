@@ -1,17 +1,5 @@
 import { NextResponse } from "next/server";
-
-function isValidSupabaseUrl(url: string | undefined) {
-  if (!url) {
-    return false;
-  }
-
-  try {
-    const parsed = new URL(url);
-    return parsed.protocol === "https:" && parsed.hostname.endsWith(".supabase.co");
-  } catch {
-    return false;
-  }
-}
+import { isValidSupabaseUrl } from "@/lib/supabase/url";
 
 export function GET() {
   return NextResponse.json({

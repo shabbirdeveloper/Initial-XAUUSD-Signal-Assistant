@@ -8,7 +8,6 @@ import {
   Brain,
   CheckCircle2,
   Clock3,
-  Flame,
   Gauge,
   Layers3,
   LineChart,
@@ -378,19 +377,12 @@ export function DashboardClient({ initialAnalysis }: { initialAnalysis: Analysis
             <div className="flex flex-wrap items-center gap-2">
               <Brain size={19} className="text-violet-200" aria-hidden="true" />
               <h2 className="text-lg font-semibold text-white">Trade Decision Center</h2>
-              {analysis.signal.eliteSetup?.detected ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-gold-400/35 bg-gold-400/15 px-3 py-1 text-xs font-bold uppercase text-gold-200">
-                  <Flame size={13} aria-hidden="true" />
-                  Elite Setup Detected
-                </span>
-              ) : (
-                <span className="rounded-full border border-white/10 bg-white/[0.045] px-3 py-1 text-xs font-semibold text-slate-300">
-                  Quality over quantity
-                </span>
-              )}
+              <span className="rounded-full border border-white/10 bg-white/[0.045] px-3 py-1 text-xs font-semibold text-slate-300">
+                Quality over quantity
+              </span>
             </div>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
-              Weighted AI model: Technical 40%, News 20%, Session 15%, SMC 15%, Risk 10%.
+              Weighted AI model: Technical 50%, News 20%, Session 20%, Risk 10%.
             </p>
           </div>
           <div className="rounded-xl border border-violet-400/25 bg-violet-500/10 px-4 py-3 text-sm shadow-[0_0_38px_rgba(124,92,255,0.12)]">
@@ -399,15 +391,14 @@ export function DashboardClient({ initialAnalysis }: { initialAnalysis: Analysis
           </div>
         </div>
 
-        <div className="relative mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-7">
+        <div className="relative mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-6">
           {[
             { label: "Market Bias", value: analysis.signal.signalType, tone: analysis.signal.signalType === "BUY" ? "green" : analysis.signal.signalType === "SELL" ? "red" : "gold" },
             { label: "AI Grade", value: analysis.signal.weightedConfidence?.grade ?? "C", tone: "violet" },
             { label: "Current Session", value: currentSessionLabel(now), tone: "cyan" },
             { label: "News Risk", value: analysis.signal.newsRisk ?? "Medium", tone: newsTone(analysis.signal.newsRisk) },
             { label: "Risk Level", value: `${analysis.signal.riskScore ?? 0}/100`, tone: riskTone(analysis.signal.riskScore) },
-            { label: "Trend Strength", value: `${analysis.signal.trendStrength ?? 0}/100`, tone: trendTone(analysis.indicators.trend) },
-            { label: "SMC Score", value: `${analysis.signal.smc?.score ?? 0}/100`, tone: analysis.signal.smc?.score && analysis.signal.smc.score >= 70 ? "green" : "gold" }
+            { label: "Trend Strength", value: `${analysis.signal.trendStrength ?? 0}/100`, tone: trendTone(analysis.indicators.trend) }
           ].map((item) => (
             <div key={item.label} className={cn("glass-tile rounded-xl border p-3.5", chipToneClass[item.tone as ChipTone])}>
               <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{item.label}</p>

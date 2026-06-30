@@ -5,6 +5,7 @@ import {
   isSupabasePostgresConfigured,
   querySupabasePostgres
 } from "@/lib/supabase/postgres";
+import { normalizeSupabaseUrl } from "@/lib/supabase/url";
 
 export const dynamic = "force-dynamic";
 
@@ -60,7 +61,7 @@ function getProjectRefFromJwt(token: string | undefined) {
 }
 
 async function probeTable(table: "signals" | "backtests") {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const url = normalizeSupabaseUrl(process.env.NEXT_PUBLIC_SUPABASE_URL);
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!url || !key) {
@@ -101,7 +102,7 @@ async function probeTable(table: "signals" | "backtests") {
 }
 
 function getDiagnosticClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const url = normalizeSupabaseUrl(process.env.NEXT_PUBLIC_SUPABASE_URL);
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!url || !key) {
@@ -298,7 +299,7 @@ async function probeRpcFallback(shouldWrite: boolean) {
 }
 
 async function fetchRestOpenApiTables() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const url = normalizeSupabaseUrl(process.env.NEXT_PUBLIC_SUPABASE_URL);
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!url || !key) {
@@ -398,7 +399,7 @@ async function probeDirectPostgres(shouldWrite: boolean) {
 }
 
 export async function GET(request: Request) {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const url = normalizeSupabaseUrl(process.env.NEXT_PUBLIC_SUPABASE_URL);
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const activeKey = serviceRoleKey || anonKey;
