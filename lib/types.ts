@@ -72,6 +72,41 @@ export interface WeightedConfidence {
   grade: QualityGrade;
 }
 
+export type TimeframeTrend = "Bullish" | "Bearish" | "Neutral";
+export type MarketCondition =
+  | "Bullish Continuation"
+  | "Bearish Continuation"
+  | "Bullish Recovery"
+  | "Bearish Rejection"
+  | "Range / No Trade"
+  | "Mixed / Wait";
+export type SignalRecommendation = "BUY" | "SELL" | "HOLD" | "NO TRADE" | "BUY WATCH" | "SELL WATCH" | "WAIT FOR BUY PULLBACK" | "WAIT FOR SELL PULLBACK";
+
+export interface TimeframeBiasSnapshot {
+  timeframe: Extract<Timeframe, "5m" | "15m" | "30m" | "1h" | "4h" | "D">;
+  trend: TimeframeTrend;
+  emaAlignment: TimeframeTrend;
+  rsiDirection: TimeframeTrend;
+  macdDirection: TimeframeTrend;
+  candleMomentum: TimeframeTrend;
+  pricePosition: "Above EMA50/EMA200" | "Above EMA50" | "Below EMA50/EMA200" | "Below EMA50" | "Between EMAs";
+  swingDirection: TimeframeTrend;
+  score: number;
+}
+
+export interface MultiTimeframeBias {
+  rows: TimeframeBiasSnapshot[];
+  bullishScore: number;
+  bearishScore: number;
+  neutralScore: number;
+  overallBias: "Bullish" | "Bearish" | "Neutral";
+  marketCondition: MarketCondition;
+  previousBiasStatus: "Sell Invalidated" | "Buy Invalidated" | "Still Confirmed" | "No Prior Bias";
+  recommendedAction: SignalRecommendation;
+  bullishReversal: boolean;
+  bearishReversal: boolean;
+}
+
 export interface TradeManagementPlan {
   tp1: number;
   tp2: number;
@@ -119,6 +154,13 @@ export interface SignalResult {
   sessionScore?: number;
   riskScore?: number;
   trendStrength?: number;
+  multiTimeframe?: MultiTimeframeBias;
+  marketCondition?: MarketCondition;
+  recommendedAction?: SignalRecommendation;
+  bullishScore?: number;
+  bearishScore?: number;
+  neutralScore?: number;
+  previousBiasStatus?: MultiTimeframeBias["previousBiasStatus"];
 }
 
 export interface MarketDataResult {
