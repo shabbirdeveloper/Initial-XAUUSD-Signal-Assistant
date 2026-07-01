@@ -397,12 +397,12 @@ export function DashboardClient({ initialAnalysis }: { initialAnalysis: Analysis
 
         <div className="relative mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-6">
           {[
-            { label: "Market Bias", value: analysis.signal.signalType, tone: analysis.signal.signalType === "BUY" ? "green" : analysis.signal.signalType === "SELL" ? "red" : "gold" },
-            { label: "AI Grade", value: analysis.signal.weightedConfidence?.grade ?? "C", tone: "violet" },
+            { label: "Current Bias", value: analysis.signal.marketCondition ?? analysis.signal.signalType, tone: analysis.signal.bias === "long" ? "green" : analysis.signal.bias === "short" ? "red" : "gold" },
+            { label: "Recommended Action", value: analysis.signal.recommendedAction ?? analysis.signal.signalType, tone: analysis.signal.recommendedAction?.includes("BUY") ? "green" : analysis.signal.recommendedAction?.includes("SELL") ? "red" : "violet" },
             { label: "Current Session", value: currentSessionLabel(now), tone: "cyan" },
             { label: "News Risk", value: analysis.signal.newsRisk ?? "Medium", tone: newsTone(analysis.signal.newsRisk) },
-            { label: "Risk Level", value: `${analysis.signal.riskScore ?? 0}/100`, tone: riskTone(analysis.signal.riskScore) },
-            { label: "Trend Strength", value: `${analysis.signal.trendStrength ?? 0}/100`, tone: trendTone(analysis.indicators.trend) }
+            { label: "Bull / Bear Score", value: `${analysis.signal.bullishScore ?? 0} / ${analysis.signal.bearishScore ?? 0}`, tone: (analysis.signal.bullishScore ?? 0) > (analysis.signal.bearishScore ?? 0) ? "green" : (analysis.signal.bearishScore ?? 0) > (analysis.signal.bullishScore ?? 0) ? "red" : "gold" },
+            { label: "Previous Bias", value: analysis.signal.previousBiasStatus ?? "No Prior Bias", tone: analysis.signal.previousBiasStatus?.includes("Invalidated") ? "green" : "gold" }
           ].map((item) => (
             <div key={item.label} className={cn("glass-tile rounded-xl border p-3.5", chipToneClass[item.tone as ChipTone])}>
               <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{item.label}</p>
